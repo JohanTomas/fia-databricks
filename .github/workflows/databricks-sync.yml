@@ -1,4 +1,4 @@
-name: Sync to Databricks
+name: Sync Databricks Git Folder
 
 on:
   push:
@@ -6,21 +6,18 @@ on:
       - main
 
 jobs:
-  sync:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Install Databricks CLI v1.x
+      - name: Setup Databricks CLI
         uses: databricks/setup-cli@main
 
-      - name: Verify CLI version
-        run: databricks --version
-
-      - name: Sync notebooks to Databricks
+      - name: Update Databricks Git Folder
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          databricks workspace import-dir databricks/notebooks /FIA-Databricks --overwrite
+          databricks repos update /Workspace/Users/TU_CORREO/fia-databricks --branch main
