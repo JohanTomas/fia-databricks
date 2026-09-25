@@ -20,4 +20,4 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          databricks repos update /Workspace/Users/TU_CORREO/fia-databricks --branch main
+          databricks repos update /Workspace/Users/johan.malasquez@vallegrande.edu.pe/fia-databricks --branch main
