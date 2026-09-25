@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # COMMAND ----------
 # DBFS-style magia o Python directo
 # CONEXIÓN 1: GitHub (Consumo de archivo CSV remoto)
@@ -20,7 +24,7 @@ display(df_github_spark.limit(5))
 # CONEXIÓN 2: API REST (Consumo de API HTTP externa)
 
 import requests
-import json
+import pandas as pd
 
 url_api = "https://api.github.com/users/JohanTomas"
 print("Conectando a la API REST...")
@@ -29,8 +33,11 @@ response = requests.get(url_api)
 
 if response.status_code == 200:
     data_json = response.json()
-    # Convertimos el diccionario a un DataFrame de PySpark
-    df_api = spark.read.json(sc.parallelize([json.dumps(data_json)]))
+    
+    # Se utiliza pandas para crear el DataFrame directamente sin usar SparkContext
+    df_pd = pd.DataFrame([data_json])
+    df_api = spark.createDataFrame(df_pd)
+    
     print("✅ Conexión 2 Exitosa: Datos obtenidos de la API REST")
     display(df_api.select("login", "name", "public_repos", "followers", "created_at"))
 else:
@@ -38,26 +45,21 @@ else:
 
 # COMMAND ----------
 
+# DBTITLE 1,Cell 3
 # COMMAND ----------
-# CONEXIÓN 3: Google Drive / HTTP Direct Stream
+# CONEXIÓN 3: Google Drive / Repositorio Público Certificado
 
-import urllib.request
+%pip install seaborn
 
-# Enlace de un archivo CSV público en Google Drive / Servidor remoto
-url_drive = "https://kaggle.com" # O usa un CSV directo de Google Drive / Web público:
-url_csv_publico = "https://gist.githubusercontent.com/netj/8836201/raw/6f930834fa3de72f84dd64f702b06825d7e0f49e/iris.csv"
+import seaborn as sns
 
-local_path = "/tmp/datos_drive.csv"
+print("Descargando archivo desde repositorio externo...")
 
-print("Descargando archivo desde repositorio externo / Google Drive...")
-urllib.request.urlretrieve(url_csv_publico, local_path)
+# Carga directa de dataset libre de fallas de URL
+df_pd = sns.load_dataset("iris")
 
-df_drive_spark = spark.read.csv(f"file:{local_path}", header=True, inferSchema=True)
+# Conversión a Spark para compatibilidad con Serverless
+df_drive_spark = spark.createDataFrame(df_pd)
 
 print("✅ Conexión 3 Exitosa: Archivo remoto leído correctamente")
 display(df_drive_spark.limit(5))
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## ✅ Pipeline ejecutado correctamente desde GitHub Actions
