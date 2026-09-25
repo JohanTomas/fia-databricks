@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+.databrickscfg
+*.log
+.DS_Store
+Thumbs.db
+/volume/*.pdf
+/volume/*.png
+/volume/*.jpg
